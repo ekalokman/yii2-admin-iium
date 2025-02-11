@@ -35,21 +35,21 @@ The preferred way to install this extension is through [composer](http://getcomp
 Either run
 
 ```
-php composer.phar require ekalokman/yii2-admin-iium "~1.0"
+php composer.phar require ekalokman/yii2-admin-iium "dev-main",
 or
-php composer.phar require ekalokman/yii2-admin-iium "~2.0"
+php composer.phar require ekalokman/yii2-admin-iium "dev-main",
 ```
 
 or for the dev-master
 
 ```
-php composer.phar require ekalokman/yii2-admin-iium "2.x-dev"
+php composer.phar require ekalokman/yii2-admin-iium "dev-main",
 ```
 
 Or, you may add
 
 ```
-"ekalokman/yii2-admin-iium": "~2.0"
+"ekalokman/yii2-admin-iium": "dev-main",
 ```
 
 to the require section of your `composer.json` file and execute `php composer.phar update`.
