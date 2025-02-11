@@ -1,6 +1,6 @@
 <?php
 /**
- * This is the configuration file for the yii2-admin unit tests.
+ * This is the configuration file for the yii2-admin-iium unit tests.
  * You can override configuration values by creating a `db-local.php` file
  * and manipulate the `$databases` variable.
  * For example to change MySQL username and password your `db-local.php` should

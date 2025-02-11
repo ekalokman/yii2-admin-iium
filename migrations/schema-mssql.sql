@@ -1,5 +1,5 @@
 /**
- * Database schema required by yii2-admin.
+ * Database schema required by yii2-admin-iium.
  *
  * @author Misbahul D Munir <misbahuldmunir@gmail.com>
  * @since 2.5
