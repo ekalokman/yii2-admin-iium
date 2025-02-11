@@ -1,5 +1,5 @@
 {
-    "name": "mdmsoft/yii2-admin",
+    "name": "ekalokman/yii2-admin",
     "description": "RBAC Auth manager for Yii2 ",
     "keywords": ["yii", "admin", "auth", "rbac"],
     "type": "yii2-extension",
@@ -10,7 +10,7 @@
     },
     "authors": [
         {
-            "name": "Misbahul Munir",
+            "name": "Eka Lokman & Misbahul Munir",
             "email": "misbahuldmunir@gmail.com"
         }
     ],
