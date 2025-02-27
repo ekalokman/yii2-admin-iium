@@ -66,6 +66,49 @@ class Assignment extends Model
         return $dataProvider;
     }
 
+    /**
+     * Create data provider for Assignment model.
+     * @param  array                        $params
+     * @param  \yii\db\ActiveRecord         $class
+     * @param  string                       $usernameField
+     * @return \yii\data\ActiveDataProvider
+     */
+    public function searchStaff($params, $class, $usernameField)
+    {
+        $query = $class::find()->joinWith(['staff'])->where(['usertype' => 'STF']);  
+
+        // echo $query->createCommand()->getRawSql();
+        // exit;
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
+
+        // Add sorting for sm_staff_name
+        $dataProvider->sort->attributes['sm_staff_name'] = [
+            'asc' => ['fdw_huris.view_staff_biodata.sm_staff_name' => SORT_ASC],
+            'desc' => ['fdw_huris.view_staff_biodata.sm_staff_name' => SORT_DESC],
+        ];
+
+        if (!($this->load($params) && $this->validate())) {
+            return $dataProvider;
+        }
+
+        // Apply filters
+        $query->andFilterWhere(['ilike', $usernameField, $this->username]);
+
+        if (!empty($this->sm_staff_name)) {
+            $query->andWhere("
+                to_tsvector('simple', fdw_huris.view_staff_biodata.sm_staff_name) @@ 
+                plainto_tsquery(:sm_staff_name) 
+                OR fdw_huris.view_staff_biodata.sm_staff_name ILIKE :sm_staff_nameLike",
+                [':sm_staff_name' => $this->sm_staff_name, ':sm_staff_nameLike' => '%' . $this->sm_staff_name . '%']
+            );
+        }
+
+        return $dataProvider;
+    }
+
       /**
      * Create data provider for Assignment model.
      * @param  array                        $params
