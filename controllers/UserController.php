@@ -359,21 +359,23 @@ class UserController extends Controller
             ]);
         }
 
-        // If user doesn't exist, create a new one
+        // If user doesn't exist, show the form
         $model = new User();
         $model->username = $ssoid;
         $model->email = $staff->sm_email_addr;
         $model->usertype = 'STF';
-        $model->created_at = time();
-        $model->generateAuthKey();
 
-        if (!$model->save(false)) { // Disable validation for simplicity
-            Yii::error('Failed to create user: ' . print_r($model->errors, true));
-            throw new \Exception('Failed to create user: ' . print_r($model->errors, true));
-        }else{
-
-            Yii::debug('User created: ' . $model->id);
-            return $this->redirect(['assignment/view', 'id' => $model->id]);
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $model->created_at = time();
+            $model->generateAuthKey();
+            
+            if ($model->save(false)) { // Disable validation to avoid duplicate validation
+                Yii::debug('User created: ' . $model->id);
+                return $this->redirect(['assignment/view', 'id' => $model->id]);
+            } else {
+                Yii::error('Failed to create user: ' . print_r($model->errors, true));
+                throw new \Exception('Failed to create user: ' . print_r($model->errors, true));
+            }
         }
 
         return $this->render('add-user', [
@@ -381,6 +383,5 @@ class UserController extends Controller
             'model' => $model,
         ]);
     }
-
 
 }
