@@ -18,6 +18,11 @@ use yii\mail\BaseMailer;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+use yii\data\Pagination;
+
+use common\models\AuthItem;
+use common\models\Staff;
+use common\models\UserAuth;
 
 /**
  * User controller
@@ -159,6 +164,13 @@ class UserController extends Controller
         ]);
     }
 
+    public function actionCreate()
+    {
+        $model = new User();
+
+        return $this->render('create', ['model' => $model]);
+    }
+
     /**
      * Request reset password
      * @return string
@@ -258,4 +270,117 @@ class UserController extends Controller
             throw new NotFoundHttpException('The requested page does not exist.');
         }
     }
+
+    public function actionSearch($query)
+    {
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON; // Ensure JSON response
+    
+        try {
+            $query = trim($query); // Trim the search query
+    
+            // Build the query to search for staff
+            $staffQuery = Staff::find()
+                ->where(['sm_staff_id' => $query])
+                ->orWhere(['ilike', 'sm_staff_name', $query])
+                ->andWhere(['computed_status_desc' => 'Active']) // Add condition for current_status is active
+                ->andWhere(['IS NOT', 'sm_email_addr', null]); // Check not null
+    
+            // Pagination setup
+            $pagination = new Pagination([
+                'totalCount' => $staffQuery->count(),
+                'pageSize' => 10, // Display 10 records per page
+            ]);
+    
+            // Fetch the data with pagination
+            $staff = $staffQuery->offset($pagination->offset)
+                ->limit($pagination->limit)
+                ->asArray()
+                ->all();
+    
+            // Return the data along with pagination links
+            return [
+                'staff' => $staff,
+                'pagination' => [
+                    'totalCount' => $pagination->totalCount,
+                    'pageCount' => $pagination->getPageCount(),
+                    'currentPage' => $pagination->getPage() + 1, // Yii2 pagination is 0-based
+                ],
+            ];
+        } catch (\Exception $e) {
+            // Log the error and return a JSON error response
+            \Yii::error('Error in actionSearch: ' . $e->getMessage());
+            return [
+                'error' => 'An error occurred while processing your request.',
+            ];
+        }
+    }
+
+        /**
+     * Check if user exists
+     * @param string $username username
+     * @return array
+     */
+    public function actionCheckUser($staff_no)
+    {
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $staffEmail = Staff::find()->select(['sm_email_addr'])->where(['sm_staff_id' => $staff_no])->scalar();
+
+        $emailParts = explode('@', $staffEmail);
+        $ssoid = $emailParts[0] ?? '';
+        
+        $exists = User::find()->where(['username' => $ssoid])->exists();
+        
+        return ['exists' => $exists];
+    }
+
+        /**
+     * Add a new user.
+     * @param string $staff_no Staff No
+     * @return string|\yii\web\Response
+     * @throws NotFoundHttpException if the staff is not found
+     */
+    public function actionAddUser($staff_no)
+    {
+        $staff = Staff::findOne(['sm_staff_id' => $staff_no]);
+        if (!$staff) {
+            throw new NotFoundHttpException('Staff not found.');
+        }
+
+        $emailParts = explode('@', $staff->sm_email_addr);
+        $ssoid = $emailParts[0] ?? '';
+
+        // Check if the user already exists
+        $existingUser = User::findOne(['username' => $ssoid]);
+        if ($existingUser) {
+            Yii::debug("User already exists: " . $existingUser->id);
+            return $this->render('add-user', [
+                'staff' => $staff,
+                'model' => $existingUser,
+            ]);
+        }
+
+        // If user doesn't exist, create a new one
+        $model = new User();
+        $model->username = $ssoid;
+        $model->email = $staff->sm_email_addr;
+        $model->usertype = 'STF';
+        $model->created_at = time();
+        $model->generateAuthKey();
+
+        if (!$model->save(false)) { // Disable validation for simplicity
+            Yii::error('Failed to create user: ' . print_r($model->errors, true));
+            throw new \Exception('Failed to create user: ' . print_r($model->errors, true));
+        }else{
+
+            Yii::debug('User created: ' . $model->id);
+            return $this->redirect(['assignment/view', 'id' => $model->id]);
+        }
+
+        return $this->render('add-user', [
+            'staff' => $staff,
+            'model' => $model,
+        ]);
+    }
+
+
 }
