@@ -61,15 +61,18 @@ class AssignmentController extends Controller
 
         if ($this->searchClass === null) {
             $searchModel = new AssignmentSearch;
-            $dataProvider = $searchModel->search(Yii::$app->getRequest()->getQueryParams(), $this->userClassName, $this->usernameField);
+            $dataProviderStaff = $searchModel->searchStaff(Yii::$app->getRequest()->getQueryParams(), $this->userClassName, $this->usernameField);
+            $dataProviderStudent = $searchModel->searchStudent(Yii::$app->getRequest()->getQueryParams(), $this->userClassName, $this->usernameField);
         } else {
             $class = $this->searchClass;
             $searchModel = new $class;
-            $dataProvider = $searchModel->search(Yii::$app->getRequest()->getQueryParams());
+            $dataProviderStaff = $searchModel->searchStaff(Yii::$app->getRequest()->getQueryParams());
+            $dataProviderStudent = $searchModel->searchStudent(Yii::$app->getRequest()->getQueryParams());
         }
 
         return $this->render('index', [
-                'dataProvider' => $dataProvider,
+                'dataProviderStaff' => $dataProviderStaff,
+                'dataProviderStudent' => $dataProviderStudent,
                 'searchModel' => $searchModel,
                 'idField' => $this->idField,
                 'usernameField' => $this->usernameField,
