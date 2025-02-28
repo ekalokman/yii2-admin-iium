@@ -19,14 +19,18 @@ $columnsStaff = [
     ['class' => 'yii\grid\SerialColumn'],
     $usernameField,
     [
-        'attribute' => 'sm_staff_name',
         'value' => 'staff.sm_staff_name',
         'label' => 'Name',
-        'filterInputOptions' => [
-            'class' => 'form-control grid-filter',
-            'placeholder' => 'Enter for Search...',
-        ],
     ],
+    // [
+    //     'attribute' => 'sm_staff_name',
+    //     'value' => 'staff.sm_staff_name',
+    //     'label' => 'Name',
+    //     'filterInputOptions' => [
+    //         'class' => 'form-control grid-filter',
+    //         'placeholder' => 'Enter for Search...',
+    //     ],
+    // ],
 ];
 
 // Define separate columns for Student
@@ -34,14 +38,18 @@ $columnsStudent = [
     ['class' => 'yii\grid\SerialColumn'],
     $usernameField,
     [
-        'attribute' => 'name',
         'value' => 'student.name',
         'label' => 'Name',
-        'filterInputOptions' => [
-            'class' => 'form-control grid-filter',
-            'placeholder' => 'Enter for Search...',
-        ],
     ],
+    // [
+    //     'attribute' => 'name',
+    //     'value' => 'student.name',
+    //     'label' => 'Name',
+    //     'filterInputOptions' => [
+    //         'class' => 'form-control grid-filter',
+    //         'placeholder' => 'Enter for Search...',
+    //     ],
+    // ],
 ];
 
 if (!empty($extraColumns)) {
