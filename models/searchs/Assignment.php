@@ -19,6 +19,7 @@ class Assignment extends Model
     public $username;
     public $email;
     public $sm_staff_name;
+    public $studentname;
     public $name; 
 
     /**
@@ -27,7 +28,7 @@ class Assignment extends Model
     public function rules()
     {
         return [
-            [['id', 'username', 'email', 'sm_staff_name', 'name'], 'safe'],
+            [['id', 'username', 'email', 'sm_staff_name', 'studentname', 'name'], 'safe'],
         ];
     }
 
@@ -128,7 +129,7 @@ class Assignment extends Model
         ]);
 
         // Add sorting for name
-        $dataProvider->sort->attributes['name'] = [
+        $dataProvider->sort->attributes['studentname'] = [
             'asc' => ['fdw_ac.stud_biodata_vw.studentname' => SORT_ASC],
             'desc' => ['fdw_ac.stud_biodata_vw.studentname' => SORT_DESC],
         ];
@@ -140,12 +141,12 @@ class Assignment extends Model
         // Apply filters
         $query->andFilterWhere(['ilike', $usernameField, $this->username]);
 
-        if (!empty($this->name)) {
+        if (!empty($this->studentname)) {
             $query->andWhere("
                 to_tsvector('simple', fdw_ac.stud_biodata_vw.studentname) @@ 
-                plainto_tsquery(:name) 
+                plainto_tsquery(:studentname) 
                 OR fdw_ac.stud_biodata_vw.name_name ILIKE :nameLike",
-                [':name' => $this->name, ':nameLike' => '%' . $this->name . '%']
+                [':studentname' => $this->studentname, ':nameLike' => '%' . $this->studentname . '%']
             );
         }
 
