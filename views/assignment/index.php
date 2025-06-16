@@ -38,7 +38,7 @@ $columnsStudent = [
     ['class' => 'yii\grid\SerialColumn'],
     $usernameField,
     [
-        'value' => 'student.name',
+        'value' => 'student.studentname',
         'label' => 'Name',
     ],
     // [
