@@ -129,8 +129,8 @@ class Assignment extends Model
 
         // Add sorting for name
         $dataProvider->sort->attributes['name'] = [
-            'asc' => ['fdw_ac_dev.student_st.name' => SORT_ASC],
-            'desc' => ['fdw_ac_dev.student_st.name' => SORT_DESC],
+            'asc' => ['fdw_ac.stud_biodata_vw.studentname' => SORT_ASC],
+            'desc' => ['fdw_ac.stud_biodata_vw.studentname' => SORT_DESC],
         ];
 
         if (!($this->load($params) && $this->validate())) {
@@ -142,9 +142,9 @@ class Assignment extends Model
 
         if (!empty($this->name)) {
             $query->andWhere("
-                to_tsvector('simple', fdw_ac_dev.student_st.name) @@ 
+                to_tsvector('simple', fdw_ac.stud_biodata_vw.studentname) @@ 
                 plainto_tsquery(:name) 
-                OR fdw_ac_dev.student_st.name_name ILIKE :nameLike",
+                OR fdw_ac.stud_biodata_vw.name_name ILIKE :nameLike",
                 [':name' => $this->name, ':nameLike' => '%' . $this->name . '%']
             );
         }
