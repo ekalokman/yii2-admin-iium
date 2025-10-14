@@ -201,7 +201,7 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public function getStaff()
     {
-        return $this->hasOne(\common\models\Staff::className(), ['sm_staff_id' => 'username']);
+        return $this->hasOne(\common\models\Staff::className(), ['sm_email_addr' => 'email']);
     }
 
     /**
