@@ -82,11 +82,13 @@ class UserController extends Controller
     public function actionIndex()
     {
         $searchModel = new UserSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProviderStaff = $searchModel->searchStaff(Yii::$app->request->queryParams);
+        $dataProviderStudent = $searchModel->searchStudent(Yii::$app->request->queryParams);
 
         return $this->render('index', [
                 'searchModel' => $searchModel,
-                'dataProvider' => $dataProvider,
+                'dataProviderStaff' => $dataProviderStaff,
+                'dataProviderStudent' => $dataProviderStudent,
         ]);
     }
 

@@ -194,4 +194,22 @@ class User extends ActiveRecord implements IdentityInterface
     {
         return Configs::userDb();
     }
+
+    /**
+     * Get staff relation
+     * @return \yii\db\ActiveQuery
+     */
+    public function getStaff()
+    {
+        return $this->hasOne(\common\models\Staff::className(), ['sm_staff_id' => 'username']);
+    }
+
+    /**
+     * Get student relation
+     * @return \yii\db\ActiveQuery
+     */
+    public function getStudent()
+    {
+        return $this->hasOne(\common\models\Student::className(), ['matric_no' => 'username']);
+    }
 }

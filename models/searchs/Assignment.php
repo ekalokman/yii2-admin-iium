@@ -87,8 +87,8 @@ class Assignment extends Model
 
         // Add sorting for sm_staff_name
         $dataProvider->sort->attributes['sm_staff_name'] = [
-            'asc' => ['fdw_huris.view_staff_biodata.sm_staff_name' => SORT_ASC],
-            'desc' => ['fdw_huris.view_staff_biodata.sm_staff_name' => SORT_DESC],
+            'asc' => ['fdw_hr.view_staff_biodata.sm_staff_name' => SORT_ASC],
+            'desc' => ['fdw_hr.view_staff_biodata.sm_staff_name' => SORT_DESC],
         ];
 
         if (!($this->load($params) && $this->validate())) {
@@ -100,9 +100,9 @@ class Assignment extends Model
 
         if (!empty($this->sm_staff_name)) {
             $query->andWhere("
-                to_tsvector('simple', fdw_huris.view_staff_biodata.sm_staff_name) @@ 
+                to_tsvector('simple', fdw_hr.view_staff_biodata.sm_staff_name) @@ 
                 plainto_tsquery(:sm_staff_name) 
-                OR fdw_huris.view_staff_biodata.sm_staff_name ILIKE :sm_staff_nameLike",
+                OR fdw_hr.view_staff_biodata.sm_staff_name ILIKE :sm_staff_nameLike",
                 [':sm_staff_name' => $this->sm_staff_name, ':sm_staff_nameLike' => '%' . $this->sm_staff_name . '%']
             );
         }
@@ -130,8 +130,8 @@ class Assignment extends Model
 
         // Add sorting for name
         $dataProvider->sort->attributes['studentname'] = [
-            'asc' => ['fdw_ac.stud_biodata_vw.studentname' => SORT_ASC],
-            'desc' => ['fdw_ac.stud_biodata_vw.studentname' => SORT_DESC],
+            'asc' => ['fdw_uia_prod.stud_biodata_vw.studentname' => SORT_ASC],
+            'desc' => ['fdw_uia_prod.stud_biodata_vw.studentname' => SORT_DESC],
         ];
 
         if (!($this->load($params) && $this->validate())) {
@@ -143,9 +143,9 @@ class Assignment extends Model
 
         if (!empty($this->studentname)) {
             $query->andWhere("
-                to_tsvector('simple', fdw_ac.stud_biodata_vw.studentname) @@ 
+                to_tsvector('simple', fdw_uia_prod.stud_biodata_vw.studentname) @@ 
                 plainto_tsquery(:studentname) 
-                OR fdw_ac.stud_biodata_vw.name_name ILIKE :nameLike",
+                OR fdw_uia_prod.stud_biodata_vw.name_name ILIKE :nameLike",
                 [':studentname' => $this->studentname, ':nameLike' => '%' . $this->studentname . '%']
             );
         }
