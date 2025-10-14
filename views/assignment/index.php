@@ -157,9 +157,14 @@ if (!empty($extraColumns)) {
 $columnsStaff[] = [
     'class' => 'yii\grid\ActionColumn',
     'template' => '{view}',
+    'urlCreator' => function ($action, $model, $key, $index) {
+        if ($action === 'view') {
+            return Url::to(['view', 'id' => $model->id]);
+        }
+    },
     'buttons' => [
         'view' => function ($url, $model, $key) {
-            return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', ['view', 'id' => $model->id], [
+            return Html::a('<i class="la la-eye"></i>', $url, [
                 'title' => Yii::t('yii', 'View'),
                 'aria-label' => Yii::t('yii', 'View'),
                 'data-pjax' => '0',
@@ -171,9 +176,14 @@ $columnsStaff[] = [
 $columnsStudent[] = [
     'class' => 'yii\grid\ActionColumn',
     'template' => '{view}',
+    'urlCreator' => function ($action, $model, $key, $index) {
+        if ($action === 'view') {
+            return Url::to(['view', 'id' => $model->id]);
+        }
+    },
     'buttons' => [
         'view' => function ($url, $model, $key) {
-            return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', ['view', 'id' => $model->id], [
+            return Html::a('<i class="la la-eye"></i>', $url, [
                 'title' => Yii::t('yii', 'View'),
                 'aria-label' => Yii::t('yii', 'View'),
                 'data-pjax' => '0',
