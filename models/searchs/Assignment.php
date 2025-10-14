@@ -5,6 +5,7 @@ namespace mdm\admin\models\searchs;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
+use yii\data\ArrayDataProvider;
 use common\models\Staff;
 
 /**
@@ -79,6 +80,9 @@ class Assignment extends Model
         // Get the full table name (may include schema)
         $tableName = $class::tableName();
 
+        // Load search parameters
+        $this->load($params);
+
         // Join with staff using custom ON condition to support OR logic
         // Status filter must be in the ON clause to preserve LEFT JOIN behavior
         $query = $class::find()
@@ -97,32 +101,40 @@ class Assignment extends Model
             )
             ->where([$tableName . '.usertype' => 'STF']);
 
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-            'pagination' => false, // Disable pagination to preserve JOIN columns
-        ]);
-
-        // Add sorting for sm_staff_name
-        $dataProvider->sort->attributes['sm_staff_name'] = [
-            'asc' => ['ad_counseling.view_staff_biodata.sm_staff_name' => SORT_ASC],
-            'desc' => ['ad_counseling.view_staff_biodata.sm_staff_name' => SORT_DESC],
-        ];
-
-        if (!($this->load($params) && $this->validate())) {
-            return $dataProvider;
-        }
-
         // Apply filters
-        $query->andFilterWhere(['ilike', $usernameField, $this->username]);
+        if ($this->validate()) {
+            $query->andFilterWhere(['ilike', $usernameField, $this->username]);
 
-        if (!empty($this->sm_staff_name)) {
-            $query->andWhere("
-                to_tsvector('simple', ad_counseling.view_staff_biodata.sm_staff_name) @@
-                plainto_tsquery(:sm_staff_name)
-                OR ad_counseling.view_staff_biodata.sm_staff_name ILIKE :sm_staff_nameLike",
-                [':sm_staff_name' => $this->sm_staff_name, ':sm_staff_nameLike' => '%' . $this->sm_staff_name . '%']
-            );
+            if (!empty($this->sm_staff_name)) {
+                $query->andWhere("
+                    to_tsvector('simple', ad_counseling.view_staff_biodata.sm_staff_name) @@
+                    plainto_tsquery(:sm_staff_name)
+                    OR ad_counseling.view_staff_biodata.sm_staff_name ILIKE :sm_staff_nameLike",
+                    [':sm_staff_name' => $this->sm_staff_name, ':sm_staff_nameLike' => '%' . $this->sm_staff_name . '%']
+                );
+            }
         }
+
+        // Execute query and get all results (without pagination at query level)
+        $models = $query->all();
+
+        // Use ArrayDataProvider for pagination (works with extra properties)
+        $dataProvider = new ArrayDataProvider([
+            'allModels' => $models,
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+            'sort' => [
+                'attributes' => [
+                    'username',
+                    'email',
+                    'sm_staff_name' => [
+                        'asc' => ['sm_staff_name' => SORT_ASC],
+                        'desc' => ['sm_staff_name' => SORT_DESC],
+                    ],
+                ],
+            ],
+        ]);
 
         return $dataProvider;
     }
@@ -136,37 +148,45 @@ class Assignment extends Model
      */
     public function searchStudent($params, $class, $usernameField)
     {
-        $query = $class::find()->joinWith(['student'])->where(['usertype' => 'STD']);  
+        // Load search parameters
+        $this->load($params);
 
-        // echo $query->createCommand()->getRawSql();
-        // exit;
-
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-            'pagination' => false, // Disable pagination to preserve JOIN columns
-        ]);
-
-        // Add sorting for name
-        $dataProvider->sort->attributes['studentname'] = [
-            'asc' => ['fdw_uia_prod.stud_biodata_vw.studentname' => SORT_ASC],
-            'desc' => ['fdw_uia_prod.stud_biodata_vw.studentname' => SORT_DESC],
-        ];
-
-        if (!($this->load($params) && $this->validate())) {
-            return $dataProvider;
-        }
+        $query = $class::find()->joinWith(['student'])->where(['usertype' => 'STD']);
 
         // Apply filters
-        $query->andFilterWhere(['ilike', $usernameField, $this->username]);
+        if ($this->validate()) {
+            $query->andFilterWhere(['ilike', $usernameField, $this->username]);
 
-        if (!empty($this->studentname)) {
-            $query->andWhere("
-                to_tsvector('simple', fdw_uia_prod.stud_biodata_vw.studentname) @@ 
-                plainto_tsquery(:studentname) 
-                OR fdw_uia_prod.stud_biodata_vw.name_name ILIKE :nameLike",
-                [':studentname' => $this->studentname, ':nameLike' => '%' . $this->studentname . '%']
-            );
+            if (!empty($this->studentname)) {
+                $query->andWhere("
+                    to_tsvector('simple', fdw_uia_prod.stud_biodata_vw.studentname) @@
+                    plainto_tsquery(:studentname)
+                    OR fdw_uia_prod.stud_biodata_vw.studentname ILIKE :nameLike",
+                    [':studentname' => $this->studentname, ':nameLike' => '%' . $this->studentname . '%']
+                );
+            }
         }
+
+        // Execute query and get all results (without pagination at query level)
+        $models = $query->all();
+
+        // Use ArrayDataProvider for pagination (works with extra properties)
+        $dataProvider = new ArrayDataProvider([
+            'allModels' => $models,
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+            'sort' => [
+                'attributes' => [
+                    'username',
+                    'email',
+                    'studentname' => [
+                        'asc' => ['studentname' => SORT_ASC],
+                        'desc' => ['studentname' => SORT_DESC],
+                    ],
+                ],
+            ],
+        ]);
 
         return $dataProvider;
     }

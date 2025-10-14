@@ -4,6 +4,7 @@ use yii\helpers\Url;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use yii\widgets\LinkPager;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -13,6 +14,96 @@ use yii\widgets\Pjax;
 
 $this->title = Yii::t('rbac-admin', 'Assignments');
 $this->params['breadcrumbs'][] = $this->title;
+
+// Register custom CSS for pagination
+$css = <<<CSS
+.pagination {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.pagination .page-item {
+    display: inline-block;
+}
+
+/* Force borders on ALL page links including navigation buttons */
+.pagination .page-link,
+.pagination .page-item .page-link,
+.pagination li a,
+.pagination li span {
+    padding: 10px 15px !important;
+    font-size: 16px !important;
+    font-weight: 500 !important;
+    color: #333 !important;
+    border: 1px solid #ddd !important;
+    margin: 0 3px !important;
+    border-radius: 5px !important;
+    background-color: #fff !important;
+    display: inline-block !important;
+    min-width: 45px !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+}
+
+.pagination .page-item.active .page-link,
+.pagination .page-item.active a,
+.pagination .page-item.active span,
+.pagination li.active a,
+.pagination li.active span {
+    background-color: var(--primary) !important;
+    border-color: var(--primary) !important;
+    color: #fff !important;
+    font-weight: bold !important;
+}
+
+/* Fallback if CSS variables not available */
+.pagination .page-item.active .page-link,
+.pagination .page-item.active a {
+    background-color: #3b5998 !important;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border-color: #667eea !important;
+}
+
+.pagination .page-link:hover,
+.pagination .page-item a:hover {
+    background-color: #f8f9fa !important;
+    border-color: #aaa !important;
+    color: #000 !important;
+}
+
+.pagination .page-item.disabled .page-link,
+.pagination .page-item.disabled a,
+.pagination .page-item.disabled span {
+    color: #ccc !important;
+    background-color: #f5f5f5 !important;
+    border-color: #ddd !important;
+    cursor: not-allowed !important;
+}
+
+/* Specifically target first and last navigation buttons */
+.pagination .page-item:first-child .page-link,
+.pagination .page-item:first-child a,
+.pagination .page-item:last-child .page-link,
+.pagination .page-item:last-child a,
+.pagination li:first-child a,
+.pagination li:last-child a {
+    border: 1px solid #ddd !important;
+    background-color: #fff !important;
+}
+
+/* Remove any border-radius override on first/last items */
+.pagination .page-item:first-child .page-link,
+.pagination .page-item:last-child .page-link {
+    border-radius: 5px !important;
+}
+
+.summary {
+    padding: 10px 0;
+    font-size: 14px;
+    color: #666;
+}
+CSS;
+$this->registerCss($css);
 
 // Define separate columns for Staff
 $columnsStaff = [
@@ -109,6 +200,17 @@ $columnsStudent[] = [
                                                 'filterModel' => $searchModel,
                                                 'tableOptions' => ['class' => 'table'],
                                                 'columns' => $columnsStaff, // Using separate columns for staff
+                                                'pager' => [
+                                                    'class' => LinkPager::class,
+                                                    'options' => ['class' => 'pagination pagination-primary'],
+                                                    'linkOptions' => ['class' => 'page-link'],
+                                                    'activePageCssClass' => 'active',
+                                                    'disabledPageCssClass' => 'disabled',
+                                                    'prevPageLabel' => '<i class="la la-angle-left"></i>',
+                                                    'nextPageLabel' => '<i class="la la-angle-right"></i>',
+                                                    'firstPageLabel' => '<i class="la la-angle-double-left"></i>',
+                                                    'lastPageLabel' => '<i class="la la-angle-double-right"></i>',
+                                                ],
                                             ]); ?>
                                         <?php Pjax::end(); ?>
                                         
@@ -126,6 +228,17 @@ $columnsStudent[] = [
                                                 'filterModel' => $searchModel,
                                                 'tableOptions' => ['class' => 'table'],
                                                 'columns' => $columnsStudent, // Using separate columns for student
+                                                'pager' => [
+                                                    'class' => LinkPager::class,
+                                                    'options' => ['class' => 'pagination pagination-primary'],
+                                                    'linkOptions' => ['class' => 'page-link'],
+                                                    'activePageCssClass' => 'active',
+                                                    'disabledPageCssClass' => 'disabled',
+                                                    'prevPageLabel' => '<i class="la la-angle-left"></i>',
+                                                    'nextPageLabel' => '<i class="la la-angle-right"></i>',
+                                                    'firstPageLabel' => '<i class="la la-angle-double-left"></i>',
+                                                    'lastPageLabel' => '<i class="la la-angle-double-right"></i>',
+                                                ],
                                             ]); ?>
                                         <?php Pjax::end(); ?>
                                         
