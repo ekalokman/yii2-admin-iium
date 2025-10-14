@@ -20,6 +20,9 @@ $css = <<<CSS
 .pagination {
     margin-top: 20px;
     margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .pagination .page-item {
@@ -153,12 +156,30 @@ if (!empty($extraColumns)) {
 
 $columnsStaff[] = [
     'class' => 'yii\grid\ActionColumn',
-    'template' => '{view}'
+    'template' => '{view}',
+    'buttons' => [
+        'view' => function ($url, $model, $key) {
+            return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', ['view', 'id' => $model->id], [
+                'title' => Yii::t('yii', 'View'),
+                'aria-label' => Yii::t('yii', 'View'),
+                'data-pjax' => '0',
+            ]);
+        },
+    ],
 ];
 
 $columnsStudent[] = [
     'class' => 'yii\grid\ActionColumn',
-    'template' => '{view}'
+    'template' => '{view}',
+    'buttons' => [
+        'view' => function ($url, $model, $key) {
+            return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', ['view', 'id' => $model->id], [
+                'title' => Yii::t('yii', 'View'),
+                'aria-label' => Yii::t('yii', 'View'),
+                'data-pjax' => '0',
+            ]);
+        },
+    ],
 ];
 ?>
 
