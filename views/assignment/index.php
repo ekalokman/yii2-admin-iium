@@ -19,7 +19,10 @@ $columnsStaff = [
     ['class' => 'yii\grid\SerialColumn'],
     $usernameField,
     [
-        'value' => 'staff.sm_staff_name',
+        'attribute' => 'sm_staff_name',
+        'value' => function($model) {
+            return $model->sm_staff_name;
+        },
         'label' => 'Name',
     ],
     // [

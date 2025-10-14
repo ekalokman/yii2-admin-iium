@@ -72,7 +72,27 @@ class User extends Model
     {
         /* @var $query \yii\db\ActiveQuery */
         $class = Yii::$app->getUser()->identityClass ? : 'mdm\admin\models\User';
-        $query = $class::find()->joinWith(['staff'])->where(['usertype' => 'STF']);
+
+        // Get the full table name (may include schema)
+        $tableName = $class::tableName();
+
+        // Join with staff using custom ON condition to support OR logic
+        // Status filter must be in the ON clause to preserve LEFT JOIN behavior
+        $query = $class::find()
+            ->select([$tableName . '.*', 'ad_counseling.view_staff_biodata.sm_staff_name AS sm_staff_name'])
+            ->leftJoin(
+                'ad_counseling.view_staff_biodata',
+                [
+                    'and',
+                    [
+                        'or',
+                        '[[ad_counseling.view_staff_biodata.sm_email_addr]] = [[' . $tableName . '.email]]',
+                        new \yii\db\Expression('[[ad_counseling.view_staff_biodata.sm_email_addr]] = CONCAT([[' . $tableName . '.username]], \'@iium.edu.my\')')
+                    ],
+                    ['ad_counseling.view_staff_biodata.sm_staff_status' => '1']
+                ]
+            )
+            ->where([$tableName . '.usertype' => 'STF']);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -80,8 +100,8 @@ class User extends Model
 
         // Add sorting for sm_staff_name
         $dataProvider->sort->attributes['sm_staff_name'] = [
-            'asc' => ['fdw_hr.view_staff_biodata.sm_staff_name' => SORT_ASC],
-            'desc' => ['fdw_hr.view_staff_biodata.sm_staff_name' => SORT_DESC],
+            'asc' => ['ad_counseling.view_staff_biodata.sm_staff_name' => SORT_ASC],
+            'desc' => ['ad_counseling.view_staff_biodata.sm_staff_name' => SORT_DESC],
         ];
 
         $this->load($params);
@@ -91,18 +111,18 @@ class User extends Model
         }
 
         $query->andFilterWhere([
-            'id' => $this->id,
-            'status' => $this->status,
+            $tableName . '.id' => $this->id,
+            $tableName . '.status' => $this->status,
         ]);
 
-        $query->andFilterWhere(['like', 'username', $this->username])
-            ->andFilterWhere(['like', 'email', $this->email]);
+        $query->andFilterWhere(['like', $tableName . '.username', $this->username])
+            ->andFilterWhere(['like', $tableName . '.email', $this->email]);
 
         if (!empty($this->sm_staff_name)) {
             $query->andWhere("
-                to_tsvector('simple', fdw_hr.view_staff_biodata.sm_staff_name) @@
+                to_tsvector('simple', ad_counseling.view_staff_biodata.sm_staff_name) @@
                 plainto_tsquery(:sm_staff_name)
-                OR fdw_hr.view_staff_biodata.sm_staff_name ILIKE :sm_staff_nameLike",
+                OR ad_counseling.view_staff_biodata.sm_staff_name ILIKE :sm_staff_nameLike",
                 [':sm_staff_name' => $this->sm_staff_name, ':sm_staff_nameLike' => '%' . $this->sm_staff_name . '%']
             );
         }

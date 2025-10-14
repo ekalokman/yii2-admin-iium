@@ -31,6 +31,9 @@ class User extends ActiveRecord implements IdentityInterface
     const STATUS_INACTIVE = 0;
     const STATUS_ACTIVE = 10;
 
+    public $sm_staff_name; // Virtual property for staff name from JOIN
+    public $name; // Virtual property for student name from JOIN
+
     /**
      * @inheritdoc
      */
@@ -56,7 +59,44 @@ class User extends ActiveRecord implements IdentityInterface
     {
         return [
             ['status', 'in', 'range' => [UserStatus::ACTIVE, UserStatus::INACTIVE]],
+            [['sm_staff_name', 'name'], 'safe'], // Allow mass assignment from JOIN
         ];
+    }
+
+    /**
+     * Override populateRecord to handle extra columns from JOINs
+     */
+    public static function populateRecord($record, $row)
+    {
+        parent::populateRecord($record, $row);
+
+        // Manually set extra columns that aren't in the table schema
+        if (isset($row['sm_staff_name'])) {
+            $record->sm_staff_name = $row['sm_staff_name'];
+        }
+        if (isset($row['name'])) {
+            $record->name = $row['name'];
+        }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function afterFind()
+    {
+        parent::afterFind();
+
+        // Populate virtual properties from query results if they exist
+        // This is needed when extra columns are selected via JOIN
+        $attrs = $this->getOldAttributes();
+
+        if (!$this->sm_staff_name && isset($attrs['sm_staff_name'])) {
+            $this->sm_staff_name = $attrs['sm_staff_name'];
+        }
+
+        if (!$this->name && isset($attrs['name'])) {
+            $this->name = $attrs['name'];
+        }
     }
 
     /**
@@ -201,7 +241,14 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public function getStaff()
     {
-        return $this->hasOne(\common\models\Staff::className(), ['sm_email_addr' => 'email']);
+        // Join staff by email OR by constructing email from username
+        // Staff usernames are typically just the staff ID (e.g., 'hairunnaja')
+        // and their email in staff table is 'hairunnaja@iium.edu.my'
+
+        // Use hasOne with primary link by email
+        // The OR condition for username@iium.edu.my is handled in joinWith() queries
+        return $this->hasOne(\common\models\Staff::className(), ['sm_email_addr' => 'email'])
+            ->andWhere(['ad_counseling.view_staff_biodata.sm_staff_status' => '1']);
     }
 
     /**
@@ -210,6 +257,6 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public function getStudent()
     {
-        return $this->hasOne(\common\models\Student::className(), ['matric_no' => 'username']);
+        return $this->hasOne(\common\models\Student::className(), ['matno' => 'username']);
     }
 }

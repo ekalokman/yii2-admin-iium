@@ -76,19 +76,36 @@ class Assignment extends Model
      */
     public function searchStaff($params, $class, $usernameField)
     {
-        $query = $class::find()->joinWith(['staff'])->where(['usertype' => 'STF']);  
+        // Get the full table name (may include schema)
+        $tableName = $class::tableName();
 
-        // echo $query->createCommand()->getRawSql();
-        // exit;
+        // Join with staff using custom ON condition to support OR logic
+        // Status filter must be in the ON clause to preserve LEFT JOIN behavior
+        $query = $class::find()
+            ->select([$tableName . '.*', 'ad_counseling.view_staff_biodata.sm_staff_name AS sm_staff_name'])
+            ->leftJoin(
+                'ad_counseling.view_staff_biodata',
+                [
+                    'and',
+                    [
+                        'or',
+                        '[[ad_counseling.view_staff_biodata.sm_email_addr]] = [[' . $tableName . '.email]]',
+                        new \yii\db\Expression('[[ad_counseling.view_staff_biodata.sm_email_addr]] = CONCAT([[' . $tableName . '.username]], \'@iium.edu.my\')')
+                    ],
+                    ['ad_counseling.view_staff_biodata.sm_staff_status' => '1']
+                ]
+            )
+            ->where([$tableName . '.usertype' => 'STF']);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'pagination' => false, // Disable pagination to preserve JOIN columns
         ]);
 
         // Add sorting for sm_staff_name
         $dataProvider->sort->attributes['sm_staff_name'] = [
-            'asc' => ['fdw_hr.view_staff_biodata.sm_staff_name' => SORT_ASC],
-            'desc' => ['fdw_hr.view_staff_biodata.sm_staff_name' => SORT_DESC],
+            'asc' => ['ad_counseling.view_staff_biodata.sm_staff_name' => SORT_ASC],
+            'desc' => ['ad_counseling.view_staff_biodata.sm_staff_name' => SORT_DESC],
         ];
 
         if (!($this->load($params) && $this->validate())) {
@@ -100,9 +117,9 @@ class Assignment extends Model
 
         if (!empty($this->sm_staff_name)) {
             $query->andWhere("
-                to_tsvector('simple', fdw_hr.view_staff_biodata.sm_staff_name) @@ 
-                plainto_tsquery(:sm_staff_name) 
-                OR fdw_hr.view_staff_biodata.sm_staff_name ILIKE :sm_staff_nameLike",
+                to_tsvector('simple', ad_counseling.view_staff_biodata.sm_staff_name) @@
+                plainto_tsquery(:sm_staff_name)
+                OR ad_counseling.view_staff_biodata.sm_staff_name ILIKE :sm_staff_nameLike",
                 [':sm_staff_name' => $this->sm_staff_name, ':sm_staff_nameLike' => '%' . $this->sm_staff_name . '%']
             );
         }
@@ -126,6 +143,7 @@ class Assignment extends Model
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'pagination' => false, // Disable pagination to preserve JOIN columns
         ]);
 
         // Add sorting for name
