@@ -94,7 +94,8 @@ class Assignment extends Model
                     [
                         'or',
                         '[[ad_counseling.view_staff_biodata.sm_email_addr]] = [[' . $tableName . '.email]]',
-                        new \yii\db\Expression('[[ad_counseling.view_staff_biodata.sm_email_addr]] = CONCAT([[' . $tableName . '.username]], \'@iium.edu.my\')')
+                        new \yii\db\Expression('[[ad_counseling.view_staff_biodata.sm_email_addr]] = CONCAT([[' . $tableName . '.username]], \'@iium.edu.my\')'),
+                        '[[ad_counseling.view_staff_biodata.personal_email]] = [[' . $tableName . '.email]]'
                     ],
                     ['ad_counseling.view_staff_biodata.sm_staff_status' => '1']
                 ]
